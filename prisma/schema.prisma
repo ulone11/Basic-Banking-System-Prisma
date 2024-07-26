@@ -28,7 +28,7 @@ model profiles {
   id           String @id @default(cuid())
   phone_number String
   address      String
-  user         users  @relation(fields: [userId], references: [id])
+  user         users  @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String @unique
 }
 

@@ -30,12 +30,9 @@ const createAccount = async (req, res) => {
 
     // Validasi input
     if (!account_name || !account_number || !balance || !userId) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Account Name, Account Number, Balance and userId are required",
-        });
+      return res.status(400).json({
+        error: "Account Name, Account Number, Balance and userId are required",
+      });
     }
     const account = await prisma.bank_accounts.create({
       data: {

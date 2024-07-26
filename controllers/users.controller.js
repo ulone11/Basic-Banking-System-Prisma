@@ -33,13 +33,10 @@ const createUserWithProfile = async (req, res) => {
     console.log("Request Body:", req.body);
 
     // Validasi input
-    if (!email || !name || !password || !phone_number || !address) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Email, name, password, phone number, and address are required",
-        });
+    if (!email || !name || !password) {
+      return res.status(400).json({
+        error: "Email, name, password, are required",
+      });
     }
 
     const user = await prisma.users.create({
@@ -64,8 +61,60 @@ const createUserWithProfile = async (req, res) => {
   }
 };
 
+const updateUsersWithProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, name, password, phone_number, address } = req.body;
+    console.log("request body", req.body);
+    const update = await prisma.users.update({
+      where: {
+        id: id,
+      },
+      data: {
+        email,
+        name,
+        password,
+        profile: {
+          upsert: {
+            create: {
+              phone_number,
+              address,
+            },
+            update: {
+              phone_number,
+              address,
+            },
+          },
+        },
+      },
+      include: {
+        profile: true,
+      },
+    });
+    res.json(update);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteUsersById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.users.delete({
+      where: { id },
+    });
+
+    res.status(204).json({ Status: "Data has been deleted" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllUser,
   getUserById,
   createUserWithProfile,
+  updateUsersWithProfile,
+  deleteUsersById,
 };
