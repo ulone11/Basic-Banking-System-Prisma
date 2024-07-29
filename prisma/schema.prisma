@@ -39,7 +39,7 @@ model bank_accounts {
   balance        Int
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-  user           users          @relation(fields: [userId], references: [id])
+  user           users          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   source         transactions[] @relation("source")
   destination    transactions[] @relation("destination")
@@ -49,8 +49,8 @@ model transactions {
   id                     String        @id @default(cuid())
   amount                 Int
   date                   DateTime      @default(now())
-  source                 bank_accounts @relation("source", fields: [source_account_id], references: [id])
-  destination            bank_accounts @relation("destination", fields: [destination_account_id], references: [id])
+  source                 bank_accounts @relation("source", fields: [source_account_id], references: [id], onDelete: Cascade)
+  destination            bank_accounts @relation("destination", fields: [destination_account_id], references: [id], onDelete: Cascade)
   source_account_id      String
   destination_account_id String
 }
