@@ -66,32 +66,37 @@ const updateUsersWithProfile = async (req, res) => {
     const { id } = req.params;
     const { email, name, password, phone_number, address } = req.body;
     console.log("request body", req.body);
-    const update = await prisma.users.update({
-      where: {
-        id: id,
-      },
-      data: {
-        email,
-        name,
-        password,
-        profile: {
-          upsert: {
-            create: {
-              phone_number,
-              address,
-            },
-            update: {
-              phone_number,
-              address,
-            },
+    const existingUser = await prisma.users.findUnique({
+      where: { id },
+      include: { profile: true },
+    });
+    if (!existingUser) {
+      res.status(400).json({ error: "User not found" });
+    }
+    const updatedData = {
+      email: email || existingUser.email,
+      name: name || existingUser.name,
+      password: password || existingUser.password,
+      profile: {
+        upsert: {
+          create: {
+            phone_number: phone_number || "",
+            address: address || "",
+          },
+          update: {
+            phone_number: phone_number || existingUser.profile?.phone_number,
+            address: address || existingUser.profile?.address,
           },
         },
       },
-      include: {
-        profile: true,
-      },
+    };
+    console.log(updatedData);
+    const updatedUser = await prisma.users.update({
+      where: { id },
+      data: updatedData,
+      include: { profile: true },
     });
-    res.json(update);
+    res.json(updatedUser);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
